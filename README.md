@@ -1,25 +1,27 @@
-# Reddit Sentiment Live Monitoring ETL Pipeline
+# Subreddit Sentiment Analysis: Personal ETL Project
 
-This project deploys an **Airflow-orchestrated Data Engineering pipeline** for the **live monitoring** of Reddit sentiment. It uses the PRAW library to scrape the newest posts, performs VADER sentiment analysis, and loads the results into a PostgreSQL database using a robust **UPSERT (Update or Insert)** mechanism to prevent duplicate data.
+This project deploys an Airflow-orchestrated Data Engineering pipeline designed to analyze the overall sentiment within a specific Reddit subreddit. The pipeline utilizes the PRAW library for scraping recent posts, performs VADER sentiment analysis to categorize text, and loads the structured results into a PostgreSQL database. It uses an update and insert logic for maintaining data integrity and preventing duplicate records. The pipeline is intentionally scoped to focus on retrieving only the most recent posts ($\sim 1,000$ per run) to demonstrate a functional ETL flow. (Reddit imposed a maximum of 1000 posts for this type of query)
 
---------- INSERT HERE REAL TALK ----
+The primary goal of this project was to apply and reinforce core concepts learned in my online courses provided by a scholarship from DataCamp (Python, SQL, Airflow, and Docker). The reason why I used a local PostgreSQL database, Airflow, and Docker as this project's components was because these are the free and available alternative of those used by companies in the tech industry. While the foundational scripts were initially generated with LLM assistance, final pipeline is the result of my direct effort in debugging, connecting components, and revising the logic to ensure execution.
 
-The pipeline is intentionally streamlined to focus only on retrieving the most recent posts ($\sim 1,000$ posts per run) from a specified subreddit.
+# Key Learnings & Takeaways
 
-## 1. Project Architecture and DAG Overview 📊
+* Integration of Technologies (Docker, Airflow, PRAW): A significant challenge I faced was trying to integrate these tools, from setting up the Python environment via Docker to securing a connection between the Airflow environment and the API's.
+* Scope Management: Model Selection: The core focus of this project was pipeline integrity and data flow, not model optimization. I chose the VADER model because it provided quick, readable sentiment scores which perfectly served the goal of demonstrating a complete ETL process. I intentionally did not invest time in researching more complex models to keep the project focused on the core data engineering challenges and producing a clean, structured output.
+* Leveraging LLMs for Workflow Efficiency: Using an LLM for initial code generation significantly reduced development time. This allowed me to concentrate on debugging challenges across Airflow, Postgres, and Python tasks that would otherwise have required months of dedicated documentation research for cross-platform implementation.
 
-The system uses the official Airflow Docker Compose stack to run a Celery Executor cluster alongside a PostgreSQL database and a Redis broker.
+## 1. Project Architecture and DAG Overview 
 
 | Component | Purpose | Technology | Key Feature |
 | :--- | :--- | :--- | :--- |
 | **`subreddit_sentiment_analysis`** | **The ETL Pipeline.** Orchestrates the entire data flow. | Apache Airflow | Manual Trigger (`schedule=None`) |
 | **Data Extraction** | Scrapes the "new" posts from the Reddit API. | PRAW via Airflow `BaseHook` | Uses batching to overcome PRAW's $\sim 1,000$ post limit. |
 | **Data Transformation** | Calculates four distinct sentiment scores. | VADER (nltk) | Provides `compound_score` for normalized overall sentiment. |
-| **Data Loading** | Writes data atomically to the final table. | PostgreSQL + `psycopg2` | Implements **`ON CONFLICT (post_id) DO UPDATE`** (UPSERT). |
+| **Data Loading** | Writes data automatically to the final table. | PostgreSQL + `psycopg2` | Implements **`ON CONFLICT (post_id) DO UPDATE`** (UPSERT). |
 
 ---
 
-## 2. Local Setup and Prerequisites 🛠️
+## 2. Local Setup and Prerequisites 
 
 To deploy and run this pipeline, you must have **Docker** and **Docker Compose** installed.
 
@@ -42,9 +44,9 @@ The `.env` file is used to configure both the Docker container user ID and the *
 ```bash
 # .env file content
 AIRFLOW_UID=50000
-REDDIT_CLIENT_ID='7tDkBK9y7FX7DRh8wIuhtg'
-REDDIT_CLIENT_SECRET='ZOqfHMG1Me2jRud8F_i2d_FRRbW9uA'
-REDDIT_USER_AGENT='reddit-sentiment-analysis-script-by egoj'
+REDDIT_CLIENT_ID='[YOUR_REDDIT_CLIENT_ID]'
+REDDIT_CLIENT_SECRET='[YOUR_REDDIT_CLIENT_SECRET]'
+REDDIT_USER_AGENT='[A_DESCRIPTIVE_USER_AGENT]'
 ```
 
 ### 2.3. Python Dependencies (requirements.txt)
@@ -82,7 +84,7 @@ The DAG uses the Airflow Connections feature to manage credentials safely. After
 4. Access the PostgreSQL database on port `5433` (`5433:5432` mapping in `docker-compose.yaml`)
 
 ## 3. ETL Logic: Update and Insert
-The loading task uses a sophisticated two-step process: COPY to a staging table, then UPSERT to the final table.
+The loading task uses a sophisticated two-step process: COPY to a staging table, then update and insert to the final table.
 
 ### 3.1. Database Tables
 The pipeline dynamically creates two tables using `prepare_table` task:
