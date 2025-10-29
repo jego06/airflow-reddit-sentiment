@@ -3,7 +3,7 @@ import pendulum
 import pandas as pd
 import praw
 import time
-import logging # Use logging for better output
+import logging 
 from io import StringIO
 
 from airflow.models.dag import DAG
@@ -21,11 +21,11 @@ analyzer = SentimentIntensityAnalyzer()
 POSTGRES_CONN_ID = "postgres_default"
 REDDIT_CONN_ID = "reddit_api_conn"
 SUBREDDIT_NAME = "mlb" 
-SCRAPE_LIMIT = 1000 # NOTE: Reddit limits in getting more than 1000 posts strictly, it's just how their api works
-BATCH_SIZE = 1000 # Max posts to fetch per API request (PRAW's limit)
+SCRAPE_LIMIT = 1000 
+BATCH_SIZE = 1000 
 
 
-# The SQL to create tables (Unchanged)
+# Create Table
 CREATE_TABLE_SQL = """
 -- 1. Final Table (Remains permanent)
 CREATE TABLE IF NOT EXISTS sentiment_results (
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS sentiment_results (
     scrape_timestamp TIMESTAMP DEFAULT NOW()
 );
 
--- 2. Staging Table (Used temporarily for each run)
+-- 2. Staging Table
 CREATE TABLE IF NOT EXISTS staging_sentiment_results (
     post_id VARCHAR(20),
     subreddit VARCHAR(50),
@@ -55,11 +55,10 @@ CREATE TABLE IF NOT EXISTS staging_sentiment_results (
     scrape_timestamp TIMESTAMP
 );
 """
-# We only drop the temporary staging table after a successful UPSERT
 DROP_STAGING_TABLE_SQL = "DROP TABLE IF EXISTS staging_sentiment_results;"
 
 
-# --- CORE ETL FUNCTIONS ---
+# --- ETL ---
 
 def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_size, **context):
     """
@@ -69,9 +68,6 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
     log = logging.getLogger(__name__)
     ti = context['ti']
 
-    # --- Robust Type Casting ---
-    # This ensures that if scrape_limit is passed as a string (e.g., from a Param)
-    # it is correctly converted to an integer.
     try:
         scrape_limit = int(scrape_limit)
     except ValueError:
@@ -94,7 +90,6 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
 
     log.info(f"Starting scrape: Target {scrape_limit} newest posts from r/{subreddit_name}.")
     
-    # --- BATCHING LOGIC ---
     all_data = []
     posts_collected = 0
     after_id = None # Used for pagination
@@ -108,7 +103,6 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
         log.info(f"Fetching batch. Collected: {posts_collected}. Requesting: {current_batch_size}. After: {after_id}")
         
         try:
-            # PRAW requires pagination parameters to be in a 'params' dict
             params = {'after': after_id} if after_id else {}
             
             submissions = list(reddit.subreddit(subreddit_name).new(
@@ -117,11 +111,11 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
             ))
         except Exception as e:
             log.error(f"Error during PRAW request: {e}. Stopping scrape.")
-            break # Exit the while loop
+            break 
 
         if not submissions:
             log.warning("PRAW returned no more submissions. End of subreddit history reached.")
-            break # Exit the while loop
+            break 
 
         # Process the batch of submissions
         for submission in submissions:
@@ -146,13 +140,11 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
         after_id = submissions[-1].fullname
         log.info(f"Batch completed ({len(submissions)} posts). Total collected: {posts_collected}.")
 
-        # --- FIX: ADD A DELAY TO AVOID RATE LIMITING ---
         if posts_collected < scrape_limit:
         # Wait for 1-2 seconds between requests to stay under the rate limit
             log.info("Pausing for 1.5 seconds to respect Reddit API rate limits...")
             time.sleep(1.5)
     
-    # --- END BATCHING LOGIC ---
     
     df = pd.DataFrame(all_data)
     
@@ -163,10 +155,8 @@ def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_s
     
     log.info(f"Successfully scraped and analyzed {len(df)} posts.")
 
-    # Push DataFrame (as a CSV string) to XCom
     csv_buffer = StringIO()
     
-    # Define columns in the exact order of the PostgreSQL staging table schema!
     columns = [
         'post_id', 'subreddit', 'title', 'body', 
         'reddit_submission_timestamp', 'compound_score', 
@@ -186,7 +176,7 @@ def load_data_to_postgres(postgres_conn_id, **context):
     1. COPYs data into a temporary staging table using the direct psycopg2 cursor.
     2. MERGEs data from staging to the final table using ON CONFLICT (UPSERT).
     """
-    # --- Consistent Logging ---
+    
     log = logging.getLogger(__name__)
     ti = context['ti']
     pg_hook = PostgresHook(postgres_conn_id)
@@ -197,7 +187,6 @@ def load_data_to_postgres(postgres_conn_id, **context):
         log.warning("No data received from upstream task. Skipping load.")
         return "Load skipped."
 
-    # Create an in-memory file buffer from the CSV string
     csv_buffer = StringIO(csv_string)
     
     staging_table = "staging_sentiment_results"
@@ -214,7 +203,6 @@ def load_data_to_postgres(postgres_conn_id, **context):
         FROM STDIN WITH (FORMAT CSV)
     """
 
-    # --- Direct psycopg2 connection logic (Unchanged) ---
     log.info(f"Connecting to database and executing bulk load into {staging_table}...")
     conn = pg_hook.get_conn()
     
@@ -225,11 +213,11 @@ def load_data_to_postgres(postgres_conn_id, **context):
             log.info("Truncating staging table.")
             cursor.execute(f"TRUNCATE TABLE {staging_table};") 
 
-            # 2. COPY data from the buffer to the staging table
+            # 2. Copy data from the buffer to the staging table
             log.info("Executing copy with cursor.copy_expert (in-memory data)...")
             cursor.copy_expert(sql=sql_copy_command, file=csv_buffer)
             
-            # 3. UPSERT (Merge) Staging Data into Final Table
+            # 3. Merge Staging Data into Final Table
             log.info(f"Merging data from {staging_table} to {final_table} via UPSERT...")
             upsert_sql = f"""
             INSERT INTO {final_table} ({', '.join(copy_columns)})
@@ -245,16 +233,15 @@ def load_data_to_postgres(postgres_conn_id, **context):
             """
             cursor.execute(upsert_sql)
 
-        # You MUST commit the transaction to make the changes permanent
         log.info("Committing transaction...")
         conn.commit()
 
     except Exception as e:
         log.error(f"Error during bulk load or UPSERT: {e}")
-        conn.rollback() # Rollback changes on error
+        conn.rollback()
         raise
     finally:
-        conn.close() # Always close the connection
+        conn.close()
     
     rows_processed = len(csv_string.splitlines())
     log.info(f"Successfully processed {rows_processed} rows via UPSERT.")
@@ -262,7 +249,7 @@ def load_data_to_postgres(postgres_conn_id, **context):
     return f"Load complete. Rows processed: {rows_processed}"
 
 
-# --- DEFINE THE DAG ---
+# --- DAG ---
 
 with DAG(
     dag_id="subreddit_sentiment_analysis",
