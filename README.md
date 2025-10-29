@@ -15,9 +15,9 @@ The primary goal of this project was to apply and reinforce core concepts learne
 | Component | Purpose | Technology | Key Feature |
 | :--- | :--- | :--- | :--- |
 | **`subreddit_sentiment_analysis`** | **The ETL Pipeline.** Orchestrates the entire data flow. | Apache Airflow | Manual Trigger (`schedule=None`) |
-| **Data Extraction** | Scrapes the "new" posts from the Reddit API. | PRAW via Airflow `BaseHook` | Uses batching to overcome PRAW's $\sim 1,000$ post limit. |
+| **Data Extraction** | Scrapes the "new" posts from the Reddit API. | PRAW via Airflow `BaseHook` | Retrieves the latest 1000 posts |
 | **Data Transformation** | Calculates four distinct sentiment scores. | VADER (nltk) | Provides `compound_score` for normalized overall sentiment. |
-| **Data Loading** | Writes data automatically to the final table. | PostgreSQL + `psycopg2` | Implements **`ON CONFLICT (post_id) DO UPDATE`** (UPSERT). |
+| **Data Loading** | Writes data automatically to the final table. | PostgreSQL + `psycopg2` | Implements **`ON CONFLICT (post_id) DO UPDATE`**. |
 
 ---
 
