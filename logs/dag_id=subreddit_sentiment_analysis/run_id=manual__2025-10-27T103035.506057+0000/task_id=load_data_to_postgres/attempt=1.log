@@ -1,0 +1,15 @@
+{"timestamp":"2025-10-27T10:30:45.240060Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2025-10-27T10:30:45.241643Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/subreddit_sentiment_dag.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2025-10-27T10:30:46.832611Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.833189Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.833537Z","level":"info","event":"Current task name:load_data_to_postgres","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.833804Z","level":"info","event":"Dag name:subreddit_sentiment_analysis","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.847898Z","level":"info","event":"Executing bulk load into sentiment_results...","logger":"root","filename":"subreddit_sentiment_dag.py","lineno":152}
+{"timestamp":"2025-10-27T10:30:46.866062Z","level":"info","event":"Executing copy with cursor.copy_expert...","logger":"root","filename":"subreddit_sentiment_dag.py","lineno":160}
+{"timestamp":"2025-10-27T10:30:46.869018Z","level":"info","event":"Committing transaction...","logger":"root","filename":"subreddit_sentiment_dag.py","lineno":164}
+{"timestamp":"2025-10-27T10:30:46.870512Z","level":"info","event":"Successfully loaded 86 rows via COPY.","logger":"root","filename":"subreddit_sentiment_dag.py","lineno":177}
+{"timestamp":"2025-10-27T10:30:46.871262Z","level":"info","event":"Done. Returned value was: Load complete. Rows inserted: 86","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":218}
+{"timestamp":"2025-10-27T10:30:46.871658Z","level":"info","event":"Pushing xcom","ti":"RuntimeTaskInstance(id=UUID('019a2538-4307-7c07-806a-f657b731bd55'), task_id='load_data_to_postgres', dag_id='subreddit_sentiment_analysis', run_id='manual__2025-10-27T10:30:35.506057+00:00', try_number=1, dag_version_id=UUID('019a2515-4d57-782f-995a-caf3166399ad'), map_index=-1, hostname='21530d029fe8', context_carrier={}, task=<Task(PythonOperator): load_data_to_postgres>, bundle_instance=LocalDagBundle(name=dags-folder), max_tries=0, start_date=datetime.datetime(2025, 10, 27, 10, 30, 44, 569681, tzinfo=datetime.timezone.utc), end_date=None, state=<TaskInstanceState.RUNNING: 'running'>, is_mapped=False, rendered_map_index=None)","logger":"task","filename":"task_runner.py","lineno":1352}
+{"timestamp":"2025-10-27T10:30:46.904215Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.904816Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2025-10-27T10:30:46.905683Z","level":"info","event":"Task operator:<Task(PythonOperator): load_data_to_postgres>","logger":"task.stdout"}

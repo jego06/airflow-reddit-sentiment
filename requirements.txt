@@ -1,0 +1,5 @@
+pandas
+praw
+nltk
+psycopg2-binary
+apache-airflow-providers-postgres

@@ -1,0 +1,17 @@
+{"timestamp":"2025-10-22T09:17:03.219030Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2025-10-22T09:17:03.220755Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/csv_to_postgres_dag.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2025-10-22T09:17:03.275958Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/csv_to_postgres_dag.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2025-10-22T09:17:03.303988Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.304553Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.305276Z","level":"info","event":"Current task name:process_save_and_load_csv","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.306030Z","level":"info","event":"Dag name:csv_to_postgres_loader_with_output","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.307452Z","level":"info","event":"Reading CSV from: /opt/airflow/data_input/sample_data.csv","logger":"root","filename":"csv_to_postgres_dag.py","lineno":30}
+{"timestamp":"2025-10-22T09:17:03.317947Z","level":"info","event":"Successfully read 3 rows. Columns: ['id', 'name', 'value']","logger":"root","filename":"csv_to_postgres_dag.py","lineno":32}
+{"timestamp":"2025-10-22T09:17:03.318685Z","level":"info","event":"Saving processed data to: /opt/airflow/data_output/processed_data.csv","logger":"root","filename":"csv_to_postgres_dag.py","lineno":38}
+{"timestamp":"2025-10-22T09:17:03.324598Z","level":"info","event":"Loading data into processed_data using file: /opt/airflow/data_output/processed_data.csv","logger":"root","filename":"csv_to_postgres_dag.py","lineno":45}
+{"timestamp":"2025-10-22T09:17:03.326756Z","level":"info","event":"Running copy expert: COPY processed_data (id, name, value) FROM STDIN WITH CSV HEADER, filename: /opt/airflow/data_output/processed_data.csv","logger":"airflow.task.hooks.airflow.providers.postgres.hooks.postgres.PostgresHook","filename":"postgres.py","lineno":355}
+{"timestamp":"2025-10-22T09:17:03.358653Z","level":"info","event":"Data loaded successfully!","logger":"root","filename":"csv_to_postgres_dag.py","lineno":49}
+{"timestamp":"2025-10-22T09:17:03.359047Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":218}
+{"timestamp":"2025-10-22T09:17:03.381163Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.381671Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2025-10-22T09:17:03.382469Z","level":"info","event":"Task operator:<Task(PythonOperator): process_save_and_load_csv>","logger":"task.stdout"}
