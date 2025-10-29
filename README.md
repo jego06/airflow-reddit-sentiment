@@ -84,7 +84,7 @@ The DAG uses the Airflow Connections feature to manage credentials safely. After
 4. Access the PostgreSQL database on port `5433` (`5433:5432` mapping in `docker-compose.yaml`)
 
 ## 3. ETL Logic: Update and Insert
-The loading task uses a sophisticated two-step process: COPY to a staging table, then update and insert to the final table.
+The loading task uses a two-step process: COPY to a staging table, then update and insert to the final table.
 
 ### 3.1. Database Tables
 The pipeline dynamically creates two tables using `prepare_table` task:
