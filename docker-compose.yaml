@@ -75,8 +75,8 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/data_input:/opt/airflow/data_input # <--- ADD THIS LINE
-    - ${AIRFLOW_PROJ_DIR:-.}/data_output:/opt/airflow/data_output # <--- AND THIS LINE
+    - ${AIRFLOW_PROJ_DIR:-.}/data_input:/opt/airflow/data_input 
+    - ${AIRFLOW_PROJ_DIR:-.}/data_output:/opt/airflow/data_output 
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -103,8 +103,6 @@ services:
     restart: always
 
   redis:
-    # Redis is limited to 7.2-bookworm due to licencing change
-    # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
     image: redis:7.2-bookworm
     expose:
       - 6379
