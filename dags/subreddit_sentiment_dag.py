@@ -63,7 +63,6 @@ DROP_STAGING_TABLE_SQL = "DROP TABLE IF EXISTS staging_sentiment_results;"
 def extract_transform_data(reddit_conn_id, subreddit_name, scrape_limit, batch_size, **context):
     """
     Extracts, transforms, and pushes the resulting DataFrame as a CSV string to XCom.
-    Now handles scrape_limit > 1000 by batching requests.
     """
     log = logging.getLogger(__name__)
     ti = context['ti']
