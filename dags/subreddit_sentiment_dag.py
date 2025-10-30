@@ -20,7 +20,7 @@ analyzer = SentimentIntensityAnalyzer()
 # --- CONFIGURATION ---
 POSTGRES_CONN_ID = "postgres_default"
 REDDIT_CONN_ID = "reddit_api_conn"
-SUBREDDIT_NAME = "mlb" 
+SUBREDDIT_NAME = "mlb" # The subreddit where the scraping will happen
 SCRAPE_LIMIT = 1000 
 BATCH_SIZE = 1000 
 
